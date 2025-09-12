@@ -1,16 +1,33 @@
-// Демонстрация "прогресса"
 document.addEventListener("DOMContentLoaded", () => {
-  const startBtn = document.querySelector(".start-btn");
-  const lesson = document.querySelector(".lesson.unlocked");
-  const span = lesson.querySelector("span");
+  const lessonsList = document.getElementById("lessons-list");
 
-  startBtn.addEventListener("click", () => {
-    let progress = parseInt(span.textContent.replace("%", ""));
-    if (progress < 100) {
-      progress += 20;
-      span.textContent = progress + "%";
-    } else {
-      alert("Урок завершён! 🎉 Теперь можно разблокировать следующий.");
-    }
-  });
+  // Получаем прогресс каждого урока
+  let allProgress = JSON.parse(localStorage.getItem("lessonsProgress")) || {};
+
+  function renderLessons() {
+    lessonsList.innerHTML = "";
+    lessons.forEach((title, index) => {
+      const li = document.createElement("li");
+      li.classList.add("lesson");
+
+      const progress = allProgress[`lesson_${index+1}`] || 0;
+
+      if (index === 0 || allProgress[`lesson_${index}`] >= 100) {
+        li.classList.add("unlocked");
+        li.innerHTML = `
+          <a href="lesson.html?num=${index+1}">${title}</a>
+          <div class="progress"><div class="bar" style="width:${progress}%"></div></div>
+          <small>${progress === 100 ? "Пройден ✅" : `Прогресс: ${progress}%`}</small>
+        `;
+      } else {
+        li.classList.add("locked");
+        li.innerHTML = `<span>${title}</span>
+                        <small>Пройдите предыдущие уроки, чтобы разблокировать</small>`;
+      }
+
+      lessonsList.appendChild(li);
+    });
+  }
+
+  renderLessons();
 });
