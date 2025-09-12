@@ -1,33 +1,33 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const lessonsList = document.getElementById("lessons-list");
+  const lessonsList = document.querySelector(".lessons ul");
 
-  // Получаем прогресс каждого урока
-  let allProgress = JSON.parse(localStorage.getItem("lessonsProgress")) || {};
+  // Создаём элементы списка уроков
+  lessons.forEach((title, index) => {
+    const lessonNum = index + 1;
+    const li = document.createElement("li");
+    li.classList.add("lesson");
 
-  function renderLessons() {
-    lessonsList.innerHTML = "";
-    lessons.forEach((title, index) => {
-      const li = document.createElement("li");
-      li.classList.add("lesson");
+    // Получаем прогресс урока
+    const progress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
 
-      const progress = allProgress[`lesson_${index+1}`] || 0;
+    // Разблокировка урока, если есть хоть что-то пройдено
+    if (progress > 0) li.classList.add("unlocked");
+    else li.classList.add("locked");
 
-      if (index === 0 || allProgress[`lesson_${index}`] >= 100) {
-        li.classList.add("unlocked");
-        li.innerHTML = `
-          <a href="lesson.html?num=${index+1}">${title}</a>
-          <div class="progress"><div class="bar" style="width:${progress}%"></div></div>
-          <small>${progress === 100 ? "Пройден ✅" : `Прогресс: ${progress}%`}</small>
-        `;
-      } else {
-        li.classList.add("locked");
-        li.innerHTML = `<span>${title}</span>
-                        <small>Пройдите предыдущие уроки, чтобы разблокировать</small>`;
-      }
+    // Контент урока без кнопок
+    li.innerHTML = `
+      <div class="lesson-title">${title}</div>
+      <div class="progress">
+        <div class="bar" style="width: ${progress}%;"></div>
+      </div>
+      <div class="lesson-percent">${progress}%</div>
+    `;
 
-      lessonsList.appendChild(li);
+    lessonsList.appendChild(li);
+
+    // Можно сделать клик на сам урок для перехода
+    li.addEventListener("click", () => {
+      window.location.href = `lesson.html?num=${lessonNum}`;
     });
-  }
-
-  renderLessons();
+  });
 });
