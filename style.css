@@ -126,6 +126,13 @@ h2 { color: var(--green-1); margin: 0 0 0.75rem 0; font-size: 1.25rem; }
 }
 .btn-next::after{ content: "→"; margin-left: 6px; font-size: 1.05rem; opacity: 0.95; }
 
+.btn-disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
 .btn:hover{ transform: translateY(-3px); }
 .btn:active{ transform: translateY(0); opacity: 0.95; }
 
