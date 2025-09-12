@@ -1,0 +1,98 @@
+/* Общие стили */
+body {
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  margin: 0;
+  background-color: #f8fdf8;
+  color: #222;
+  line-height: 1.6;
+}
+
+header {
+  text-align: center;
+  background: linear-gradient(135deg, #0a8f3a, #28c76f);
+  color: white;
+  padding: 2rem 1rem;
+  border-bottom: 4px solid #0a8f3a;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+header .subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+}
+
+main {
+  padding: 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.intro {
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+h2 {
+  color: #0a8f3a;
+  margin-bottom: 1rem;
+}
+
+/* Уроки */
+.lessons ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lesson {
+  background: white;
+  border: 2px solid #cce8d6;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform 0.2s;
+}
+
+.lesson.unlocked {
+  border-color: #28c76f;
+  cursor: pointer;
+}
+
+.lesson.unlocked:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.lesson.locked {
+  color: #999;
+  background: #f0f5f0;
+}
+
+/* Прогресс-бар */
+.progress {
+  background: #e0f2e9;
+  border-radius: 6px;
+  height: 10px;
+  margin: 0.5rem 0;
+}
+
+.progress .bar {
+  background: linear-gradient(135deg, #0a8f3a, #28c76f);
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+/* Подвал */
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  background: #0a8f3a;
+  color: white;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
