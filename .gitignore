@@ -1,0 +1,16 @@
+# Секреты и конфиги
+.env
+credentials.json
+config.py
+
+# Кеши и служебные файлы
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# IDE
+.vscode/
+.idea/
