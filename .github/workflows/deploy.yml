@@ -1,4 +1,4 @@
-name: Deploy WebApp to Pages
+name: Deploy WebApp to GitHub Pages
 
 on:
   push:
@@ -9,25 +9,20 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Забираем репозиторий
+      # 1. Получаем код
       - uses: actions/checkout@v3
 
-      # Настройка Git
-      - name: Set Git user
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      # 2. Устанавливаем Node (если нужны сборки, иначе можно пропустить)
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-      # Очищаем docs и копируем webapp
-      - name: Prepare docs
-        run: |
-          rm -rf docs
-          mkdir docs
-          cp -r webapp/* docs/
-
-      # Делаем commit только если есть изменения
-      - name: Commit & Push
-        run: |
-          git add docs
-          git diff --cached --quiet || git commit -m "chore: update docs from webapp"
-          git push
+      # 3. Пушим webapp напрямую в gh-pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./webapp
+          publish_branch: gh-pages
+          force_orphan: true
