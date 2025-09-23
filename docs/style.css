@@ -1,0 +1,186 @@
+/* ---------- Базовые стили ---------- */
+:root{
+  --green-1: #0a8f3a;
+  --green-2: #28c76f;
+  --bg: #f8fdf8;
+  --muted: #999;
+  --card: #ffffff;
+  --accent-border: #cce8d6;
+  --light-accent: #eaf7ec;
+}
+
+* { box-sizing: border-box; }
+
+html,body{
+  height: 100%;
+  margin: 0;
+  background: var(--bg);
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  color: #222;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height: 1.6;
+}
+
+/* ---------- Header ---------- */
+header{
+  text-align: center;
+  background: linear-gradient(135deg, var(--green-1), var(--green-2));
+  color: #fff;
+  padding: 2rem 1rem;
+  border-bottom: 4px solid var(--green-1);
+}
+header h1{ margin: 0; font-size: 2.25rem; font-weight: 700; }
+header .subtitle{ font-size: 1rem; opacity: 0.95; margin-top: 6px; }
+
+/* ---------- Layout main ---------- */
+main{
+  padding: 2rem 1rem;
+  max-width: 980px;
+  margin: 0 auto 4rem;
+}
+
+/* ---------- Intro ---------- */
+.intro { margin-bottom: 1.5rem; font-size: 1.05rem; color: #233; }
+
+/* ---------- Headings ---------- */
+h2 { color: var(--green-1); margin: 0 0 0.75rem 0; font-size: 1.25rem; }
+
+/* ---------- Lessons list (index) ---------- */
+.lessons ul{ list-style: none; padding: 0; margin: 0; }
+.lesson{
+  background: var(--card);
+  border: 2px solid var(--accent-border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.lesson.unlocked{ border-color: var(--green-2); cursor: pointer; }
+.lesson.unlocked:hover{ transform: translateY(-4px); box-shadow: 0 10px 30px rgba(10,143,58,0.06); }
+.lesson.locked{ color: var(--muted); background: #f0f5f0; }
+
+/* ---------- Progress bar (cards) ---------- */
+.progress{ background: #e0f2e9; border-radius: 6px; height: 10px; margin: 0.5rem 0; overflow: hidden; }
+.progress .bar{ background: linear-gradient(135deg,var(--green-1),var(--green-2)); height:100%; width:0%; border-radius:6px; transition: width .35s ease; }
+
+/* ---------- Top progress (on lesson page) ---------- */
+.top-progress{
+  background: #f3fff4;
+  border: 1px solid #d6efdf;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 12px 0 18px 0;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.03);
+}
+.top-progress-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:8px; }
+.top-progress-label{ font-weight:600; color: var(--green-1); }
+.top-progress-percent{ font-weight:700; color: var(--green-1); }
+.top-progress-bar{ background: var(--light-accent); border-radius:8px; height:10px; overflow:hidden; }
+.top-progress-fill{ background: linear-gradient(135deg,var(--green-1),var(--green-2)); height:100%; width:0%; transition: width .25s ease; border-radius:8px; }
+
+/* ---------- Compact home button near top ---------- */
+.home-top{
+  display:inline-flex; align-items:center; gap:8px;
+  background: transparent; color: var(--green-1);
+  border: 1px solid rgba(10,143,58,0.12); padding:6px 10px; border-radius:10px;
+  font-weight:700; text-decoration:none;
+  transition: background .12s, transform .12s;
+}
+.home-top:hover{ background: rgba(10,143,58,0.06); transform: translateY(-2px); }
+
+/* ---------- Lesson content ---------- */
+.lesson-content { position: relative; padding-bottom: 160px; } /* space for action block */
+
+/* ---------- Buttons (primary styles used by action block) ---------- */
+.btn{
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  min-width: 170px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+/* Back (left) — neutral outline */
+.btn-back{
+  background: transparent;
+  color: var(--green-1);
+  border: 2px solid rgba(10,143,58,0.12);
+  box-shadow: none;
+}
+.btn-back::before{ content: "←"; margin-right: 6px; font-size: 1.05rem; opacity: 0.95; }
+
+/* Next (right) — accent */
+.btn-next{
+  background: linear-gradient(135deg,var(--green-1),var(--green-2));
+  color: #fff;
+  border: 0;
+  box-shadow: 0 8px 22px rgba(10,143,58,0.14);
+}
+.btn-next::after{ content: "→"; margin-left: 6px; font-size: 1.05rem; opacity: 0.95; }
+
+.btn-disabled {
+  background: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
+}
+
+.btn:hover{ transform: translateY(-3px); }
+.btn:active{ transform: translateY(0); opacity: 0.95; }
+
+/* ---------- Lesson actions: centered in the viewport ---------- */
+.lesson-actions{
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  z-index: 900;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.96);
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+  border: 1px solid rgba(10,143,58,0.06);
+  max-width: calc(100% - 48px);
+}
+
+/* Compact layout on narrow screens: column, full-width, Next large at bottom */
+@media (max-width: 720px){
+  .lesson-actions{
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 10px;
+    width: calc(100% - 24px);
+    max-width: 720px;
+    padding: 10px;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+  }
+  .btn { width: 100%; min-width: 0; padding: 14px 16px; font-size: 1rem; }
+}
+
+/* Small height screens */
+@media (max-height: 520px){
+  .lesson-actions { bottom: 12px; }
+}
+
+/* Footer */
+footer{
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--green-1);
+  color: white;
+  margin-top: 2.5rem;
+  font-size: 0.9rem;
+}

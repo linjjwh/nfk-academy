@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>НФК-Академия — Урок</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>НФК-Академия — Урок</h1>
+  </header>
+
+  <main>
+    <section class="lesson-content">
+      <h2 id="lesson-title">Загрузка урока...</h2>
+
+      <div class="top-progress">
+        <div class="top-progress-row">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div class="top-progress-label">Пройдено:</div>
+            <div class="top-progress-percent" id="top-progress-percent">0%</div>
+          </div>
+          <a href="index.html" class="home-top" title="Вернуться к списку уроков">🏠 Главная</a>
+        </div>
+        <div class="top-progress-bar">
+          <div id="top-progress-bar-fill" class="top-progress-fill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <p id="lesson-text">Содержимое урока будет здесь. Прокручивайте вниз, чтобы пройти урок.</p>
+      <div id="lesson-body" style="height:2200px; margin:12px 0; border-radius:8px; background:linear-gradient(#fff,#f6fff6)"></div>
+
+    </section>
+  </main>
+
+  <!-- Кнопки действий внизу страницы -->
+  <div class="lesson-actions">
+    <button id="back-btn" class="btn btn-back">Назад к списку</button>
+    <button id="next-btn" class="btn btn-next">Следующий урок</button>
+  </div>
+
+  <script src="lessonsData.js"></script>
+  <script src="lesson.js"></script>
+</body>
+</html>
