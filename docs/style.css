@@ -90,7 +90,9 @@ h2 { color: var(--green-1); margin: 0 0 0.75rem 0; font-size: 1.25rem; }
 .home-top:hover{ background: rgba(10,143,58,0.06); transform: translateY(-2px); }
 
 /* ---------- Lesson content ---------- */
-.lesson-content { position: relative; padding-bottom: 160px; } /* space for action block */
+.lesson-content{
+ position: relative; padding-bottom: 100px;
+}
 
 /* ---------- Buttons (primary styles used by action block) ---------- */
 .btn{
