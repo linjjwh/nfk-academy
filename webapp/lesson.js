@@ -11,7 +11,62 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Загружаем текст урока
   lessonTitle.textContent = lessons[lessonNum - 1];
-  lessonText.textContent = `Здесь будет текст урока ${lessonNum}...`;
+  const lesson = lessonsData.find(l => l.id === lessonNum);
+
+  if (lesson) {
+  // Очищаем контейнер
+  lessonText.innerHTML = "";
+
+  lesson.sections.forEach(section => {
+    // Заголовок секции
+    if (section.heading) {
+      const h2 = document.createElement("h2");
+      h2.textContent = section.heading;
+      lessonText.appendChild(h2);
+    }
+
+    // В зависимости от типа секции
+    if (section.type === "text") {
+      section.content.forEach(p => {
+        const pEl = document.createElement("p");
+        pEl.textContent = p;
+        lessonText.appendChild(pEl);
+      });
+    }
+
+    if (section.type === "list") {
+      const ul = document.createElement("ul");
+      section.content.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+      lessonText.appendChild(ul);
+    }
+
+    if (section.type === "list-numbered") {
+      const ol = document.createElement("ol");
+      section.content.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ol.appendChild(li);
+      });
+      lessonText.appendChild(ol);
+    }
+
+    if (section.type === "questions") {
+      const div = document.createElement("div");
+      div.classList.add("questions-block");
+      section.content.forEach((q, idx) => {
+        const pEl = document.createElement("p");
+        pEl.textContent = `${idx + 1}. ${q}`;
+        div.appendChild(pEl);
+      });
+      lessonText.appendChild(div);
+    }
+  });
+}
+
 
   // Получаем максимальный прогресс из localStorage
   let maxProgress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
