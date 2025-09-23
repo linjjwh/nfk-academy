@@ -9,17 +9,25 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # Забираем репозиторий
       - uses: actions/checkout@v3
 
-      - name: Copy webapp to docs
-        run: |
-          rm -rf docs
-          cp -r webapp docs
-
-      - name: Commit and push
+      # Настройка Git
+      - name: Set Git user
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      # Очищаем docs и копируем webapp
+      - name: Prepare docs
+        run: |
+          rm -rf docs
+          mkdir docs
+          cp -r webapp/* docs/
+
+      # Делаем commit только если есть изменения
+      - name: Commit & Push
+        run: |
           git add docs
-          git commit -m "chore: update docs from webapp" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "chore: update docs from webapp"
           git push
