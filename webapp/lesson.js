@@ -277,7 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sec.appendChild(quizContainer);
     }
 
-    // 4) Drag & Drop (соединение пар)
+    // 4) Drag & Drop (универсальный: ПК + мобильные)
     if (section.type === "drag-drop") {
       const dragWrap = document.createElement("div");
       dragWrap.classList.add("dragdrop-container");
@@ -295,43 +295,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const groupA = document.createElement("div");
       groupA.classList.add("dragdrop-group", "group-a");
-      groupA.style.display = "flex";
-      groupA.style.flexDirection = "column";
-      groupA.style.gap = "10px";
 
       const groupB = document.createElement("div");
       groupB.classList.add("dragdrop-group", "group-b");
-      groupB.style.display = "flex";
-      groupB.style.flexDirection = "column";
-      groupB.style.gap = "10px";
 
-      // Блоки A
+      // === Блоки A ===
       (section.content?.groupA || []).forEach(item => {
         const el = document.createElement("div");
         el.classList.add("drag-item");
-        el.draggable = true;
         el.dataset.id = item.id;
+        el.draggable = true;
         el.textContent = item.text;
         groupA.appendChild(el);
       });
 
-      // Блоки B
+      // === Блоки B ===
       (section.content?.groupB || []).forEach(item => {
         const el = document.createElement("div");
         el.classList.add("drop-target");
         el.dataset.id = item.id;
         el.dataset.currentMatches = 0;
-
-        // flex-контейнер для вставленных элементов
         el.style.display = "flex";
         el.style.flexDirection = "column";
         el.style.alignItems = "center";
         el.style.justifyContent = "flex-start";
         el.style.gap = "6px";
         el.style.padding = "8px 12px";
-
         el.textContent = item.text;
-        setsWrap.appendChild(el);
         groupB.appendChild(el);
       });
 
@@ -340,66 +330,113 @@ document.addEventListener("DOMContentLoaded", () => {
       dragWrap.appendChild(setsWrap);
       sec.appendChild(dragWrap);
 
-      // Логика Drag & Drop
-      let draggedItem = null;
+      const draggables = groupA.querySelectorAll(".drag-item");
+      const dropzones = groupB.querySelectorAll(".drop-target");
 
-      groupA.querySelectorAll(".drag-item").forEach(drag => {
-        drag.addEventListener("dragstart", e => {
-          draggedItem = drag;
-          drag.classList.add("dragging");
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+      if (isTouchDevice) {
+        // === Click-to-move для мобилок ===
+        let selectedItem = null;
+
+        draggables.forEach(drag => {
+          drag.addEventListener("click", () => {
+            draggables.forEach(d => d.classList.remove("selected"));
+            selectedItem = drag;
+            drag.classList.add("selected");
+          });
         });
-        drag.addEventListener("dragend", () => {
-          drag.classList.remove("dragging");
-          draggedItem = null;
-        });
-      });
 
-      groupB.querySelectorAll(".drop-target").forEach(drop => {
-        drop.addEventListener("dragover", e => {
-          e.preventDefault();
-          drop.classList.add("hover");
-        });
-        drop.addEventListener("dragleave", () => {
-          drop.classList.remove("hover");
-        });
-        drop.addEventListener("drop", e => {
-          e.preventDefault();
-          drop.classList.remove("hover");
-          if (!draggedItem) return;
+        dropzones.forEach(drop => {
+          drop.addEventListener("click", () => {
+            if (!selectedItem) return;
 
-          const correctPair = (section.content?.correctMatches || []).find(
-            m => m.a === draggedItem.dataset.id && m.b === drop.dataset.id
-          );
+            const correctPair = (section.content?.correctMatches || []).find(
+              m => m.a === selectedItem.dataset.id && m.b === drop.dataset.id
+            );
 
-          // Если draggedItem уже в dropzone — не удаляем его
-          const isAlreadyInDrop = draggedItem.parentElement.classList.contains("drop-target");
-
-          // Если это первый перенос из группы A — удаляем исходный блок
-          if (!isAlreadyInDrop && draggedItem.classList.contains("drag-item")) {
-            draggedItem.remove();
-          }
-
-          // убираем старые классы wrong/correct
-          draggedItem.classList.remove("wrong", "correct");
-
-          // Добавляем правильные/неправильные классы
-          if (correctPair) {
-            draggedItem.classList.add("correct");
-            draggedItem.textContent = draggedItem.textContent.replace(" ❗", "") + " ✅";
-            draggedItem.draggable = false; // фиксируем правильный блок
-          } else {
-            draggedItem.classList.add("wrong");
-            if (!draggedItem.textContent.includes(" ❗")) {
-              draggedItem.textContent += " ❗";
+            const isAlreadyInDrop = selectedItem.parentElement.classList.contains("drop-target");
+            if (!isAlreadyInDrop && selectedItem.classList.contains("drag-item")) {
+              selectedItem.remove();
             }
-            draggedItem.draggable = true; // можно перетаскивать дальше
-            setTimeout(() => draggedItem.classList.remove("wrong"), 800);
-          }
 
-          drop.appendChild(draggedItem);
+            selectedItem.classList.remove("wrong", "correct");
+
+            if (correctPair) {
+              selectedItem.classList.add("correct");
+              selectedItem.textContent = selectedItem.textContent.replace(" ❗", "") + " ✅";
+              selectedItem.draggable = false;
+            } else {
+              selectedItem.classList.add("wrong");
+              if (!selectedItem.textContent.includes(" ❗")) selectedItem.textContent += " ❗";
+              selectedItem.draggable = true;
+              setTimeout(() => selectedItem.classList.remove("wrong"), 800);
+            }
+
+            drop.appendChild(selectedItem);
+            selectedItem.classList.remove("selected");
+            selectedItem = null;
+
+            // Подсветка completed
+            const totalNeeded = (section.content?.groupA || []).filter(
+              a => section.content.correctMatches.some(m => m.a === a.id && m.b === drop.dataset.id)
+            ).length;
+            if (Number(drop.dataset.currentMatches) >= totalNeeded) drop.classList.add("completed");
+          });
         });
-      });
-    } // конец drag-drop
+
+      } else {
+        // === Drag & Drop для ПК ===
+        let draggedItem = null;
+
+        draggables.forEach(drag => {
+          drag.addEventListener("dragstart", () => {
+            draggedItem = drag;
+            drag.classList.add("dragging");
+          });
+          drag.addEventListener("dragend", () => {
+            draggedItem = null;
+            drag.classList.remove("dragging");
+          });
+        });
+
+        dropzones.forEach(drop => {
+          drop.addEventListener("dragover", e => e.preventDefault());
+          drop.addEventListener("dragleave", () => drop.classList.remove("hover"));
+          drop.addEventListener("drop", () => {
+            if (!draggedItem) return;
+
+            const correctPair = (section.content?.correctMatches || []).find(
+              m => m.a === draggedItem.dataset.id && m.b === drop.dataset.id
+            );
+
+            const isAlreadyInDrop = draggedItem.parentElement.classList.contains("drop-target");
+            if (!isAlreadyInDrop && draggedItem.classList.contains("drag-item")) draggedItem.remove();
+
+            draggedItem.classList.remove("wrong", "correct");
+
+            if (correctPair) {
+              draggedItem.classList.add("correct");
+              draggedItem.textContent = draggedItem.textContent.replace(" ❗", "") + " ✅";
+              draggedItem.draggable = false;
+            } else {
+              draggedItem.classList.add("wrong");
+              if (!draggedItem.textContent.includes(" ❗")) draggedItem.textContent += " ❗";
+              draggedItem.draggable = true;
+              setTimeout(() => draggedItem.classList.remove("wrong"), 800);
+            }
+
+            drop.appendChild(draggedItem);
+
+            // Подсветка completed
+            const totalNeeded = (section.content?.groupA || []).filter(
+              a => section.content.correctMatches.some(m => m.a === a.id && m.b === drop.dataset.id)
+            ).length;
+            if (Number(drop.dataset.currentMatches) >= totalNeeded) drop.classList.add("completed");
+          });
+        });
+      }
+    }
 
     // 5) Step-by-step list with hint
     if (section.type === "expandable-list") {
