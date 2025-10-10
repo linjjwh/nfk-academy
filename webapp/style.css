@@ -493,18 +493,18 @@ footer{
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: 40px;
+  gap: 30px;
   margin-top: 30px;
   margin-bottom: 40px;
 }
 
 .dragdrop-group {
   flex: 1 1 45%;
-  min-width: 280px;
+  min-width: 220px; /* меньше для мобильных */
   background: #f8f9fb;
   border: 2px dashed #cdd6f6;
   border-radius: 16px;
-  padding: 20px;
+  padding: 18px;
   transition: all 0.3s ease;
   position: relative;
   box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.03);
@@ -517,17 +517,11 @@ footer{
   content: attr(data-label);
   position: absolute;
   top: -12px;
-  left: 20px;
+  left: 15px;
   background: #f8f9fb;
-  padding: 0 10px;
+  padding: 0 8px;
   font-size: 0.9rem;
   color: #6a7ab5;
-}
-
-.dragdrop-group.dragover {
-  border-color: #4e8cff;
-  background: #f0f6ff;
-  box-shadow: 0 0 12px rgba(78, 140, 255, 0.2);
 }
 
 /* === Блоки A === */
@@ -535,8 +529,8 @@ footer{
   background: #ffffff;
   border: 1.5px solid #dce3f9;
   border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 12px;
+  padding: 10px 14px; /* чуть меньше на мобилках */
+  margin-bottom: 10px;
   cursor: grab;
   font-weight: 500;
   color: #333;
@@ -546,9 +540,7 @@ footer{
   align-items: center;
   justify-content: center;
   text-align: center;
-  word-wrap: break-word;
-  box-sizing: border-box;
-  min-height: 48px;
+  min-height: 44px; /* меньше на мобилках */
 }
 
 .drag-item:hover {
@@ -561,20 +553,7 @@ footer{
   opacity: 0.6;
   border-color: #4e8cff;
   background: #e6efff;
-  transform: rotate(2deg);
   cursor: grabbing;
-}
-
-.drag-item.correct {
-  background-color: #e9f9ee;
-  border-color: #44c767;
-  color: #1a7a2e;
-}
-
-.drag-item.wrong {
-  background-color: #fde8e8;
-  border-color: #e45b5b;
-  color: #a32626;
 }
 
 /* === Зоны B === */
@@ -582,89 +561,43 @@ footer{
   background: #ffffff;
   border: 1.5px dashed #dce3f9;
   border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 12px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
   font-weight: 500;
   color: #333;
-  transition: all 0.25s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   text-align: center;
-  word-wrap: break-word;
-  box-sizing: border-box;
-  min-height: 48px;
   gap: 6px;
+  min-height: 44px;
 }
 
-.drop-target.correct {
-  border-color: #44c767;
-  background-color: #e8fce8;
-}
-
-.drop-target.wrong {
-  border-color: #e45b5b;
-  background-color: #fde8e8;
-}
-
-.drop-target.completed {
-  border-color: #44c767 !important;
-  background-color: #f0fff5 !important;
-  box-shadow: 0 0 12px rgba(68,199,103,0.25);
-  transition: all 0.4s ease;
-}
-
-/* === Подсказка / Фидбек === */
-.dragdrop-feedback {
-  text-align: center;
-  font-size: 1rem;
-  color: #333;
-  background: #f9f9f9;
-  border-radius: 10px;
-  padding: 15px 20px;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.05);
-  margin-top: 25px;
-  display: none;
-}
-
-.dragdrop-feedback.show {
-  display: block;
-  animation: fadeIn 0.4s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* === Группы A и B === */
-.group-a, .group-b {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.group-a {
-  justify-content: flex-start;
-}
-
-.group-b {
-  justify-content: flex-start;
-}
+/* Правильные / неправильные */
+.drop-target.correct { border-color: #44c767; background-color: #e8fce8; }
+.drop-target.wrong { border-color: #e45b5b; background-color: #fde8e8; }
+.drop-target.completed { border-color: #44c767 !important; background-color: #f0fff5 !important; box-shadow: 0 0 12px rgba(68,199,103,0.25); transition: all 0.4s ease; }
 
 /* Адаптив */
 @media (max-width: 700px) {
   .dragdrop-container {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
   }
 
   .dragdrop-group {
     width: 100%;
+    min-width: 100%;
+  }
+
+  .drag-item, .drop-target {
+    font-size: 0.9rem;
+    padding: 10px;
+    min-height: 40px;
   }
 }
+
 
 /* === Step-by-step list === */
 .step-list-wrap {
