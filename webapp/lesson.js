@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sec.appendChild(h);
     }
 
-    /* ===== ТИПЫ СЕКЦИЙ (существующие) ===== */
+    /* ===== ТИПЫ СЕКЦИЙ ===== */
     if (section.type === "text") {
       section.content.forEach(pText => {
         const p = document.createElement("p");
@@ -77,81 +77,90 @@ document.addEventListener("DOMContentLoaded", () => {
       sec.appendChild(wrap);
     }
 
-    /* ===== НОВЫЕ ТИПЫ: flipcards / quiz / choice ===== */
+    /* ===== ИНТЕРАКТИВНЫЕ ТИПЫ ===== */
 
-    // 1) Flipcards — поддерживаем имена section.type: "flipcards" или "flip-card"
-if (section.type === "flipcards" || section.type === "flip-cards" || section.type === "flip-card" || section.type === "flipcard") {
-  const container = document.createElement("div");
-  container.classList.add("flipcard-container");
+// 1) Flipcards — поддерживаем имена section.type: "flipcards" или "flip-card"
+    if (section.type === "flipcards" || section.type === "flip-cards" || section.type === "flip-card" || section.type === "flipcard") {
+      const containerWrap = document.createElement("div");
+      containerWrap.classList.add("flipcard-wrap");
 
-  // создаём карточки
-  (section.content || []).forEach(card => {
-    const cardWrap = document.createElement("div");
-    cardWrap.classList.add("flipcard");
-    cardWrap.setAttribute("tabindex", "0");
-    cardWrap.setAttribute("role", "button");
-    cardWrap.setAttribute("aria-pressed", "false");
+      // подсказка
+      const hint = document.createElement("p");
+      hint.classList.add("flipcard-hint");
+      hint.textContent = "Нажми на карточку, чтобы увидеть определение 👇";
+      containerWrap.appendChild(hint);
 
-    const inner = document.createElement("div");
-    inner.classList.add("flipcard-inner");
+      const container = document.createElement("div");
+      container.classList.add("flipcard-container");
 
-    const front = document.createElement("div");
-    front.classList.add("flipcard-front");
-    front.innerHTML = card.front || "";
+      // создаём карточки
+      (section.content || []).forEach(card => {
+        const cardWrap = document.createElement("div");
+        cardWrap.classList.add("flipcard");
+        cardWrap.setAttribute("tabindex", "0");
+        cardWrap.setAttribute("role", "button");
+        cardWrap.setAttribute("aria-pressed", "false");
 
-    const back = document.createElement("div");
-    back.classList.add("flipcard-back");
-    back.innerHTML = card.back || "";
+        const inner = document.createElement("div");
+        inner.classList.add("flipcard-inner");
 
-    inner.appendChild(front);
-    inner.appendChild(back);
-    cardWrap.appendChild(inner);
-    container.appendChild(cardWrap);
+        const front = document.createElement("div");
+        front.classList.add("flipcard-front");
+        front.innerHTML = card.front || "";
 
-    // при инициализации — задаём высоту под front
-    inner.style.height = front.scrollHeight + "px";
+        const back = document.createElement("div");
+        back.classList.add("flipcard-back");
+        back.innerHTML = card.back || "";
 
-    // функция переворота с динамической высотой
-    const toggleFlip = () => {
-      cardWrap.classList.toggle("flip");
-      cardWrap.setAttribute("aria-pressed", cardWrap.classList.contains("flip") ? "true" : "false");
+        inner.appendChild(front);
+        inner.appendChild(back);
+        cardWrap.appendChild(inner);
+        container.appendChild(cardWrap);
 
-      if (cardWrap.classList.contains("flip")) {
-        inner.style.height = back.scrollHeight + "px";
-      } else {
+        // при инициализации — задаём высоту под front
         inner.style.height = front.scrollHeight + "px";
-      }
-    };
 
-    // клик / клавиатура
-    cardWrap.addEventListener("click", toggleFlip);
-    cardWrap.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggleFlip();
-      }
-    });
-  });
+        // функция переворота с динамической высотой
+        const toggleFlip = () => {
+          cardWrap.classList.toggle("flip");
+          cardWrap.setAttribute("aria-pressed", cardWrap.classList.contains("flip") ? "true" : "false");
 
-  sec.appendChild(container);
+          if (cardWrap.classList.contains("flip")) {
+            inner.style.height = back.scrollHeight + "px";
+          } else {
+            inner.style.height = front.scrollHeight + "px";
+          }
+        };
 
-  // после рендера: можно при желании сделать одинаковой высоту фронтов
-  requestAnimationFrame(() => {
-    const allInner = container.querySelectorAll(".flipcard-inner");
-    let maxFrontHeight = 0;
+        // клик / клавиатура
+        cardWrap.addEventListener("click", toggleFlip);
+        cardWrap.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleFlip();
+          }
+        });
+      });
 
-    allInner.forEach(inner => {
-      const front = inner.querySelector(".flipcard-front");
-      if (front.scrollHeight > maxFrontHeight) maxFrontHeight = front.scrollHeight;
-    });
+      containerWrap.appendChild(container);
+      sec.appendChild(containerWrap);
 
-    allInner.forEach(inner => {
-      // только фронт задаём одинаковым — back остаётся динамическим
-      inner.style.height = maxFrontHeight + "px";
-    });
-  });
-}
+      // после рендера: можно при желании сделать одинаковую высоту фронтов
+      requestAnimationFrame(() => {
+        const allInner = container.querySelectorAll(".flipcard-inner");
+        let maxFrontHeight = 0;
 
+        allInner.forEach(inner => {
+          const front = inner.querySelector(".flipcard-front");
+          if (front.scrollHeight > maxFrontHeight) maxFrontHeight = front.scrollHeight;
+        });
+
+        allInner.forEach(inner => {
+          // только фронт задаём одинаковым — back остаётся динамическим
+          inner.style.height = maxFrontHeight + "px";
+        });
+      });
+    }
 
 
     // 2) Choice (мини-задачка)
@@ -213,7 +222,9 @@ if (section.type === "flipcards" || section.type === "flip-cards" || section.typ
       const quizContainer = document.createElement("div");
       quizContainer.classList.add("quiz-container");
 
-      (section.content || []).forEach((qObj, qIndex) => {
+      const contentArray = Array.isArray(section.content) ? section.content : [section.content];
+
+      contentArray.forEach((qObj, qIndex) => {
         const qBlock = document.createElement("div");
         qBlock.classList.add("quiz-block-item");
         qBlock.style.marginBottom = "18px";
@@ -226,12 +237,10 @@ if (section.type === "flipcards" || section.type === "flip-cards" || section.typ
         const optsWrap = document.createElement("div");
         optsWrap.classList.add("quiz-options");
 
-        // options as array of strings
         (qObj.options || []).forEach((optText, i) => {
           const btn = document.createElement("button");
           btn.classList.add("quiz-btn");
           btn.type = "button";
-          // если optText — строка, используем её напрямую
           btn.textContent = typeof optText === "string" ? optText : optText.text;
           btn.dataset.index = i;
 
@@ -251,7 +260,6 @@ if (section.type === "flipcards" || section.type === "flip-cards" || section.typ
               }
             }
 
-            // показать объяснение из qObj.explanation
             const expl = document.createElement("div");
             expl.classList.add("quiz-explanation");
             expl.textContent = qObj.explanation || "";
@@ -262,7 +270,6 @@ if (section.type === "flipcards" || section.type === "flip-cards" || section.typ
           optsWrap.appendChild(btn);
         });
 
-
         qBlock.appendChild(optsWrap);
         quizContainer.appendChild(qBlock);
       });
@@ -270,9 +277,193 @@ if (section.type === "flipcards" || section.type === "flip-cards" || section.typ
       sec.appendChild(quizContainer);
     }
 
+    // 4) Drag & Drop (соединение пар)
+    if (section.type === "drag-drop") {
+      const dragWrap = document.createElement("div");
+      dragWrap.classList.add("dragdrop-container");
+
+      const instruction = document.createElement("p");
+      instruction.classList.add("dragdrop-instruction");
+      instruction.textContent = section.content?.instruction || "Соедини элементы:";
+      dragWrap.appendChild(instruction);
+
+      const setsWrap = document.createElement("div");
+      setsWrap.classList.add("dragdrop-sets");
+      setsWrap.style.display = "flex";
+      setsWrap.style.justifyContent = "space-between";
+      setsWrap.style.gap = "40px";
+
+      const groupA = document.createElement("div");
+      groupA.classList.add("dragdrop-group", "group-a");
+      groupA.style.display = "flex";
+      groupA.style.flexDirection = "column";
+      groupA.style.gap = "10px";
+
+      const groupB = document.createElement("div");
+      groupB.classList.add("dragdrop-group", "group-b");
+      groupB.style.display = "flex";
+      groupB.style.flexDirection = "column";
+      groupB.style.gap = "10px";
+
+      // Блоки A
+      (section.content?.groupA || []).forEach(item => {
+        const el = document.createElement("div");
+        el.classList.add("drag-item");
+        el.draggable = true;
+        el.dataset.id = item.id;
+        el.textContent = item.text;
+        groupA.appendChild(el);
+      });
+
+      // Блоки B
+      (section.content?.groupB || []).forEach(item => {
+        const el = document.createElement("div");
+        el.classList.add("drop-target");
+        el.dataset.id = item.id;
+        el.dataset.currentMatches = 0;
+
+        // flex-контейнер для вставленных элементов
+        el.style.display = "flex";
+        el.style.flexDirection = "column";
+        el.style.alignItems = "center";
+        el.style.justifyContent = "flex-start";
+        el.style.gap = "6px";
+        el.style.padding = "8px 12px";
+
+        el.textContent = item.text;
+        setsWrap.appendChild(el);
+        groupB.appendChild(el);
+      });
+
+      setsWrap.appendChild(groupA);
+      setsWrap.appendChild(groupB);
+      dragWrap.appendChild(setsWrap);
+      sec.appendChild(dragWrap);
+
+      // Логика Drag & Drop
+      let draggedItem = null;
+
+      groupA.querySelectorAll(".drag-item").forEach(drag => {
+        drag.addEventListener("dragstart", e => {
+          draggedItem = drag;
+          drag.classList.add("dragging");
+        });
+        drag.addEventListener("dragend", () => {
+          drag.classList.remove("dragging");
+          draggedItem = null;
+        });
+      });
+
+      groupB.querySelectorAll(".drop-target").forEach(drop => {
+        drop.addEventListener("dragover", e => {
+          e.preventDefault();
+          drop.classList.add("hover");
+        });
+        drop.addEventListener("dragleave", () => {
+          drop.classList.remove("hover");
+        });
+        drop.addEventListener("drop", e => {
+          e.preventDefault();
+          drop.classList.remove("hover");
+          if (!draggedItem) return;
+
+          const correctPair = (section.content?.correctMatches || []).find(
+            m => m.a === draggedItem.dataset.id && m.b === drop.dataset.id
+          );
+
+          // Если draggedItem уже в dropzone — не удаляем его
+          const isAlreadyInDrop = draggedItem.parentElement.classList.contains("drop-target");
+
+          // Если это первый перенос из группы A — удаляем исходный блок
+          if (!isAlreadyInDrop && draggedItem.classList.contains("drag-item")) {
+            draggedItem.remove();
+          }
+
+          // убираем старые классы wrong/correct
+          draggedItem.classList.remove("wrong", "correct");
+
+          // Добавляем правильные/неправильные классы
+          if (correctPair) {
+            draggedItem.classList.add("correct");
+            draggedItem.textContent = draggedItem.textContent.replace(" ❗", "") + " ✅";
+            draggedItem.draggable = false; // фиксируем правильный блок
+          } else {
+            draggedItem.classList.add("wrong");
+            if (!draggedItem.textContent.includes(" ❗")) {
+              draggedItem.textContent += " ❗";
+            }
+            draggedItem.draggable = true; // можно перетаскивать дальше
+            setTimeout(() => draggedItem.classList.remove("wrong"), 800);
+          }
+
+          drop.appendChild(draggedItem);
+        });
+      });
+    } // конец drag-drop
+
+    // 5) Step-by-step list with hint
+    if (section.type === "expandable-list") {
+      const listWrap = document.createElement("div");
+      listWrap.classList.add("step-list-wrap");
+
+      // подсказка
+      const hint = document.createElement("p");
+      hint.classList.add("step-hint");
+      hint.textContent = "Нажми на первый пункт, чтобы увидеть продолжение 👇";
+      listWrap.appendChild(hint);
+
+      const stepList = document.createElement("div");
+      stepList.classList.add("step-list");
+
+      let after = null;
+      if (section.afterText) {
+        after = document.createElement("p");
+        after.classList.add("step-after");
+        after.textContent = section.afterText;
+        after.style.display = "none"; // скрываем по дефолту
+      }
+
+      (section.content || []).forEach((text, i) => {
+        const row = document.createElement("div");
+        row.classList.add("step-item");
+
+        // последний пункт финальный
+        if (i === section.content.length - 1) row.classList.add("final-step");
+
+        row.textContent = text;
+
+        // все кроме первого скрываем изначально
+        if (i > 0) row.style.display = "none";
+
+        row.addEventListener("click", () => {
+          const next = stepList.children[i + 1];
+          if (next) {
+            next.style.display = "flex";
+            next.classList.add("fade-in");
+
+            // если это предпоследний пункт и следующий последний — показываем afterText сразу
+            if (next.classList.contains("final-step") && after) {
+              after.style.display = "block";
+              after.classList.add("fade-in");
+            }
+          }
+        });
+
+        stepList.appendChild(row);
+      });
+
+  listWrap.appendChild(stepList);
+  if (after) listWrap.appendChild(after);
+
+  sec.appendChild(listWrap);
+}
+
+
+
     // Добавляем секцию в тело урока
     lessonBody.appendChild(sec);
   }); // end forEach section
+
 
   /* ===== Прогресс: сохраняем/читаем из localStorage (как у тебя было) ===== */
   let maxProgress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
