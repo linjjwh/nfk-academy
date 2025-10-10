@@ -579,25 +579,176 @@ footer{
 .drop-target.wrong { border-color: #e45b5b; background-color: #fde8e8; }
 .drop-target.completed { border-color: #44c767 !important; background-color: #f0fff5 !important; box-shadow: 0 0 12px rgba(68,199,103,0.25); transition: all 0.4s ease; }
 
-/* Адаптив */
+/* === Выбранный блок на мобильных === */
+.drag-item.selected {
+  border-color: #4e8cff;
+  background: #e9f1ff;
+  box-shadow: 0 0 10px rgba(78, 140, 255, 0.3);
+  transform: scale(1.05);
+  transition: all 0.25s ease;
+}
+
+/* === Адаптив под мобильные экраны === */
 @media (max-width: 700px) {
   .dragdrop-container {
     flex-direction: column;
-    gap: 15px;
+    align-items: stretch;
+    gap: 18px;
+    margin-top: 20px;
   }
 
   .dragdrop-group {
     width: 100%;
-    min-width: 100%;
+    min-width: unset;
+    padding: 14px;
+    border-radius: 12px;
   }
 
   .drag-item, .drop-target {
     font-size: 0.9rem;
-    padding: 10px;
+    padding: 10px 12px;
     min-height: 40px;
+  }
+
+  .drag-item {
+    cursor: pointer;
+    touch-action: manipulation; /* предотвращает случайные скроллы при тапах */
+  }
+
+  .drop-target {
+    cursor: pointer;
+  }
+}
+/* === FIX: dragdrop layout & click return === */
+.dragdrop-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.dragdrop-group {
+  flex: 1 1 45%;
+  max-width: 48%;
+}
+
+@media (max-width: 700px) {
+  .dragdrop-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .dragdrop-group {
+    max-width: 100%;
+    width: 100%;
   }
 }
 
+/* clickable items (desktop & mobile) */
+.drag-item {
+  cursor: grab;
+  transition: all 0.25s ease;
+}
+
+.drag-item.selected {
+  cursor: pointer;
+  border-color: #4e8cff;
+  background: #e9f1ff;
+  transform: scale(1.05);
+}
+
+/* возвращение блока из зоны */
+.drop-target.wrong .drag-item,
+.drop-target.correct .drag-item {
+  cursor: pointer;
+}
+
+/* === FIX layout: text + dragdrop in 2 columns on desktop === */
+.dragdrop-wrapper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.dragdrop-container {
+  flex: 1 1 55%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.dragdrop-group {
+  flex: 1 1 48%;
+  max-width: 48%;
+}
+
+@media (max-width: 800px) {
+  .dragdrop-wrapper {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .dragdrop-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dragdrop-group {
+    max-width: 100%;
+  }
+}
+
+/* === Исправление раскладки для ПК === */
+.dragdrop-sets {
+  display: flex;
+  flex-direction: row; /* по горизонтали */
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  width: 100%;
+}
+
+/* Контейнер инструкции + две колонки */
+.dragdrop-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Чтобы группы А и B делились равномерно */
+.dragdrop-group.group-a,
+.dragdrop-group.group-b {
+  flex: 1 1 45%;
+}
+
+/* === Адаптив под мобильные экраны === */
+@media (max-width: 700px) {
+  .dragdrop-sets {
+    flex-direction: column; /* уходим в столбик */
+    gap: 18px;
+  }
+
+  .dragdrop-group.group-a,
+  .dragdrop-group.group-b {
+    flex: 1 1 100%;
+  }
+
+  .dragdrop-wrapper {
+    align-items: stretch;
+  }
+}
+
+.dragdrop-instruction {
+  text-align: center;
+  font-weight: 500;
+  font-size: 1.1rem;
+  margin: 0 auto 20px auto;
+  opacity: 0.9;
+}
 
 /* === Step-by-step list === */
 .step-list-wrap {
