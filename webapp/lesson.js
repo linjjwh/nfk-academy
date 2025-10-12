@@ -589,6 +589,215 @@ if (section.type === "drag-drop") {
   sec.appendChild(listWrap);
 }
 
+    // 6) Simulator (симулятор расчёта дохода)
+// 6) Simulator (симулятор расчёта дохода)
+if (section.type === "simulator") {
+  const simWrap = document.createElement("div");
+  simWrap.classList.add("simulator-container");
+
+  const desc = document.createElement("p");
+  desc.textContent = section.content || "Попробуй рассчитать доход!";
+  simWrap.appendChild(desc);
+
+  const form = document.createElement("div");
+  form.classList.add("simulator-form");
+
+  const createField = (labelText, min, max, step, defaultValue, suffix = "", id, marks = []) => {
+    const fieldWrap = document.createElement("div");
+    fieldWrap.classList.add("sim-field");
+
+    const label = document.createElement("label");
+    label.textContent = labelText;
+    fieldWrap.appendChild(label);
+
+    const inputRow = document.createElement("div");
+    inputRow.classList.add("input-row");
+
+    const numberInput = document.createElement("input");
+    numberInput.type = "number";
+    numberInput.value = defaultValue;
+    numberInput.id = id;
+    numberInput.classList.add("sim-input");
+
+    const suffixSpan = document.createElement("span");
+    suffixSpan.textContent = suffix;
+    suffixSpan.classList.add("suffix");
+
+    const rangeInput = document.createElement("input");
+    rangeInput.type = "range";
+    rangeInput.min = min;
+    rangeInput.max = max;
+    rangeInput.step = step;
+    rangeInput.value = defaultValue;
+    rangeInput.classList.add("sim-range");
+
+    // Создаем элемент для подсказки
+    const hint = document.createElement("div");
+    hint.classList.add("sim-hint");
+    hint.style.display = "none";
+    hint.style.fontSize = "11px";
+    hint.style.color = "#666";
+    hint.style.marginTop = "4px";
+    hint.style.transition = "opacity 0.3s ease";
+
+    // Функция для показа подсказки
+    const showHint = (message, duration = 2000) => {
+      hint.textContent = message;
+      hint.style.display = "block";
+      hint.style.opacity = "1";
+
+      setTimeout(() => {
+        hint.style.opacity = "0";
+        setTimeout(() => {
+          hint.style.display = "none";
+        }, 300);
+      }, duration);
+    };
+
+    // Функция для корректировки значения
+    const adjustValue = (value) => {
+      let val = parseFloat(value);
+      let originalVal = val;
+      let message = "";
+
+      // Если значение не число, возвращаем минимальное
+      if (isNaN(val)) {
+        message = `Установлено минимальное значение: ${min}`;
+        val = min;
+      } else {
+        // Ограничиваем по минимуму и максимуму
+        if (val < min) {
+          message = `Установлено минимальное значение: ${min}`;
+          val = min;
+        } else if (val > max) {
+          message = `Установлено максимальное значение: ${max}`;
+          val = max;
+        }
+
+        // Для суммы вложения округляем до ближайшего кратного 1000
+        if (id === "amount") {
+          const roundedVal = Math.round(val / 1000) * 1000;
+          if (roundedVal !== val) {
+            message = `Сумма округлена до ${roundedVal.toLocaleString()} ₽ (кратно 1000)`;
+            val = roundedVal;
+          }
+        }
+
+        // Для процентной ставки округляем до целого числа
+        if (id === "rate") {
+          const roundedVal = Math.round(val);
+          if (roundedVal !== val) {
+            message = `Ставка округлена до ${roundedVal}%`;
+            val = roundedVal;
+          }
+        }
+
+        // Для месяцев оставляем целым числом
+        if (id === "months") {
+          const roundedVal = Math.round(val);
+          if (roundedVal !== val) {
+            message = `Срок округлен до ${roundedVal} месяцев`;
+            val = roundedVal;
+          }
+        }
+      }
+
+      return { value: val, message };
+    };
+
+    // Валидация при потере фокуса
+    numberInput.addEventListener("blur", () => {
+      const { value: adjustedValue, message } = adjustValue(numberInput.value);
+
+      if (numberInput.value !== adjustedValue.toString()) {
+        numberInput.value = adjustedValue;
+        rangeInput.value = adjustedValue;
+        if (message) {
+          showHint(message);
+        }
+      }
+    });
+
+    // Валидация при нажатии Enter
+    numberInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        const { value: adjustedValue, message } = adjustValue(numberInput.value);
+
+        if (numberInput.value !== adjustedValue.toString()) {
+          numberInput.value = adjustedValue;
+          rangeInput.value = adjustedValue;
+          if (message) {
+            showHint(message);
+          }
+        }
+        numberInput.blur();
+      }
+    });
+
+    // Связь слайдера с инпутом (слайдер всегда валиден)
+    rangeInput.addEventListener("input", () => {
+      numberInput.value = rangeInput.value;
+    });
+
+    // Разметка значений по процентам
+    const marksWrap = document.createElement("div");
+    marksWrap.classList.add("sim-marks");
+    marks.forEach(val => {
+      const mark = document.createElement("span");
+      mark.textContent = val;
+      const percent = ((val - min) / (max - min)) * 100;
+      mark.style.position = "absolute";
+      mark.style.left = `${percent}%`;
+      mark.style.transform = "translateX(-50%)";
+      mark.style.top = "0";
+      mark.style.fontSize = "12px";
+      mark.style.color = "#999";
+      mark.style.whiteSpace = "nowrap";
+      marksWrap.appendChild(mark);
+    });
+
+    inputRow.appendChild(numberInput);
+    inputRow.appendChild(suffixSpan);
+    fieldWrap.appendChild(inputRow);
+    fieldWrap.appendChild(rangeInput);
+    fieldWrap.appendChild(marksWrap);
+    fieldWrap.appendChild(hint); // Добавляем подсказку в поле
+
+    return fieldWrap;
+  };
+
+  const amountField = createField("💵 Сумма вложения", 1000, 1000000, 1000, 10000, "₽", "amount", [1000, 250000, 500000, 750000, 1000000]);
+  const rateField = createField("📈 Процентная ставка", 10, 31, 1, 15, "%", "rate", [10, 15, 20, 25, 30, 31]);
+  const periodField = createField("🕒 Срок (мес.)", 1, 120, 1, 12, "мес.", "months", [1, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120]);
+
+  form.appendChild(amountField);
+  form.appendChild(rateField);
+  form.appendChild(periodField);
+
+  const calcBtn = document.createElement("button");
+  calcBtn.textContent = "Рассчитать";
+  calcBtn.classList.add("sim-btn");
+
+  const result = document.createElement("div");
+  result.classList.add("sim-result");
+  result.textContent = "Результат: 0 ₽";
+
+  calcBtn.addEventListener("click", () => {
+    const P = parseFloat(document.getElementById("amount").value);
+    const r = parseFloat(document.getElementById("rate").value) / 100 / 12;
+    const n = parseInt(document.getElementById("months").value);
+
+    const total = P * Math.pow(1 + r, n);
+    const profit = total - P;
+    result.textContent = `Результат: ${profit.toFixed(2)} ₽ прибыли за ${n} мес.`;
+  });
+
+  simWrap.appendChild(form);
+  simWrap.appendChild(calcBtn);
+  simWrap.appendChild(result);
+
+  sec.appendChild(simWrap);
+}
     // Добавляем секцию в тело урока
     lessonBody.appendChild(sec);
   }); // end forEach section

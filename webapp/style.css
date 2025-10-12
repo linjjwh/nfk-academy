@@ -802,3 +802,146 @@ footer{
   margin-top: 16px;
   color: #333;
 }
+
+/* === Simulator === */
+/* === Simulator === */
+.simulator-container {
+  background: #fafafa;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin: 2rem 0;
+  text-align: center;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.simulator-container p {
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.simulator-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.sim-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sim-field label {
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+}
+
+.input-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sim-input {
+  width: 110px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: right;
+  font-size: 1rem;
+}
+
+.suffix {
+  font-weight: 500;
+  color: #555;
+}
+
+.sim-range {
+  width: 100%;
+  margin-top: 8px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 6px;
+  background: var(--light-accent);
+}
+
+.sim-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--green-2);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--green-1);
+}
+
+.sim-range::-webkit-slider-thumb:hover {
+  background: var(--green-1);
+}
+
+.sim-marks {
+  position: relative;
+  width: 100%;
+  height: 20px;
+  margin-top: 8px;
+}
+
+.sim-marks span {
+  font-size: 11px;
+  color: #666;
+  font-weight: 500;
+}
+
+.sim-btn {
+  margin-top: 1.2rem;
+  padding: 12px 22px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--green-1), var(--green-2));
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.sim-btn:hover {
+  transform: translateY(-2px);
+}
+
+.sim-result {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--green-1);
+  background: var(--light-accent);
+  padding: 0.8rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.sim-hint {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+  transition: opacity 0.3s ease;
+}
+
+/* Адаптив */
+@media (max-width: 800px) {
+  .simulator-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .sim-input {
+    width: 100px;
+  }
+}
