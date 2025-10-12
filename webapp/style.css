@@ -219,6 +219,7 @@ footer{
   text-align: center;
 }
 
+/* === ФЛИП-КАРТЫ === */
 /* === ФЛИП-КАРТЫ (для "Теории простыми словами") === */
 .flipcard-container {
   display: flex;
@@ -291,6 +292,34 @@ footer{
   color: #fff;
   transform: rotateY(180deg);
   font-weight: 500;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 800px) {
+  .flipcard-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 5px;
+  }
+
+  .flipcard {
+    width: 100%;
+    max-width: 400px;
+    min-height: 140px;
+  }
+
+  .flipcard-front,
+  .flipcard-back {
+    padding: 25px 20px;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .flipcard-hint {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+  }
 }
 
 /* === МИНИ-ЗАДАЧКА === */
