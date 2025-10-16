@@ -590,214 +590,425 @@ if (section.type === "drag-drop") {
 }
 
     // 6) Simulator (симулятор расчёта дохода)
-// 6) Simulator (симулятор расчёта дохода)
-if (section.type === "simulator") {
-  const simWrap = document.createElement("div");
-  simWrap.classList.add("simulator-container");
+    if (section.type === "simulator") {
+      const simWrap = document.createElement("div");
+      simWrap.classList.add("simulator-container");
 
-  const desc = document.createElement("p");
-  desc.textContent = section.content || "Попробуй рассчитать доход!";
-  simWrap.appendChild(desc);
+      const desc = document.createElement("p");
+      desc.textContent = section.content || "Попробуй рассчитать доход!";
+      simWrap.appendChild(desc);
 
-  const form = document.createElement("div");
-  form.classList.add("simulator-form");
+      const form = document.createElement("div");
+      form.classList.add("simulator-form");
 
-  const createField = (labelText, min, max, step, defaultValue, suffix = "", id, marks = []) => {
-    const fieldWrap = document.createElement("div");
-    fieldWrap.classList.add("sim-field");
+      const createField = (labelText, min, max, step, defaultValue, suffix = "", id, marks = []) => {
+        const fieldWrap = document.createElement("div");
+        fieldWrap.classList.add("sim-field");
 
-    const label = document.createElement("label");
-    label.textContent = labelText;
-    fieldWrap.appendChild(label);
+        const label = document.createElement("label");
+        label.textContent = labelText;
+        fieldWrap.appendChild(label);
 
-    const inputRow = document.createElement("div");
-    inputRow.classList.add("input-row");
+        const inputRow = document.createElement("div");
+        inputRow.classList.add("input-row");
 
-    const numberInput = document.createElement("input");
-    numberInput.type = "number";
-    numberInput.value = defaultValue;
-    numberInput.id = id;
-    numberInput.classList.add("sim-input");
+        const numberInput = document.createElement("input");
+        numberInput.type = "number";
+        numberInput.value = defaultValue;
+        numberInput.id = id;
+        numberInput.classList.add("sim-input");
 
-    const suffixSpan = document.createElement("span");
-    suffixSpan.textContent = suffix;
-    suffixSpan.classList.add("suffix");
+        const suffixSpan = document.createElement("span");
+        suffixSpan.textContent = suffix;
+        suffixSpan.classList.add("suffix");
 
-    const rangeInput = document.createElement("input");
-    rangeInput.type = "range";
-    rangeInput.min = min;
-    rangeInput.max = max;
-    rangeInput.step = step;
-    rangeInput.value = defaultValue;
-    rangeInput.classList.add("sim-range");
+        const rangeInput = document.createElement("input");
+        rangeInput.type = "range";
+        rangeInput.min = min;
+        rangeInput.max = max;
+        rangeInput.step = step;
+        rangeInput.value = defaultValue;
+        rangeInput.classList.add("sim-range");
 
-    // Создаем элемент для подсказки
-    const hint = document.createElement("div");
-    hint.classList.add("sim-hint");
-    hint.style.display = "none";
-    hint.style.fontSize = "11px";
-    hint.style.color = "#666";
-    hint.style.marginTop = "4px";
-    hint.style.transition = "opacity 0.3s ease";
+        // Создаем элемент для подсказки
+        const hint = document.createElement("div");
+        hint.classList.add("sim-hint");
+        hint.style.display = "none";
+        hint.style.fontSize = "11px";
+        hint.style.color = "#666";
+        hint.style.marginTop = "4px";
+        hint.style.transition = "opacity 0.3s ease";
 
-    // Функция для показа подсказки
-    const showHint = (message, duration = 2000) => {
-      hint.textContent = message;
-      hint.style.display = "block";
-      hint.style.opacity = "1";
+        // Функция для показа подсказки
+        const showHint = (message, duration = 2000) => {
+          hint.textContent = message;
+          hint.style.display = "block";
+          hint.style.opacity = "1";
 
-      setTimeout(() => {
-        hint.style.opacity = "0";
+          setTimeout(() => {
+            hint.style.opacity = "0";
+            setTimeout(() => {
+              hint.style.display = "none";
+            }, 300);
+          }, duration);
+        };
+
+        // Функция для корректировки значения
+        const adjustValue = (value) => {
+          let val = parseFloat(value);
+          let originalVal = val;
+          let message = "";
+
+          // Если значение не число, возвращаем минимальное
+          if (isNaN(val)) {
+            message = `Установлено минимальное значение: ${min}`;
+            val = min;
+          } else {
+            // Ограничиваем по минимуму и максимуму
+            if (val < min) {
+              message = `Установлено минимальное значение: ${min}`;
+              val = min;
+            } else if (val > max) {
+              message = `Установлено максимальное значение: ${max}`;
+              val = max;
+            }
+
+            // Для суммы вложения округляем до ближайшего кратного 1000
+            if (id === "amount") {
+              const roundedVal = Math.round(val / 1000) * 1000;
+              if (roundedVal !== val) {
+                message = `Сумма округлена до ${roundedVal.toLocaleString()} ₽ (кратно 1000)`;
+                val = roundedVal;
+              }
+            }
+
+            // Для процентной ставки округляем до целого числа
+            if (id === "rate") {
+              const roundedVal = Math.round(val);
+              if (roundedVal !== val) {
+                message = `Ставка округлена до ${roundedVal}%`;
+                val = roundedVal;
+              }
+            }
+
+            // Для месяцев оставляем целым числом
+            if (id === "months") {
+              const roundedVal = Math.round(val);
+              if (roundedVal !== val) {
+                message = `Срок округлен до ${roundedVal} месяцев`;
+                val = roundedVal;
+              }
+            }
+          }
+
+          return { value: val, message };
+        };
+
+        // Валидация при потере фокуса
+        numberInput.addEventListener("blur", () => {
+          const { value: adjustedValue, message } = adjustValue(numberInput.value);
+
+          if (numberInput.value !== adjustedValue.toString()) {
+            numberInput.value = adjustedValue;
+            rangeInput.value = adjustedValue;
+            if (message) {
+              showHint(message);
+            }
+          }
+        });
+
+        // Валидация при нажатии Enter
+        numberInput.addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            const { value: adjustedValue, message } = adjustValue(numberInput.value);
+
+            if (numberInput.value !== adjustedValue.toString()) {
+              numberInput.value = adjustedValue;
+              rangeInput.value = adjustedValue;
+              if (message) {
+                showHint(message);
+              }
+            }
+            numberInput.blur();
+          }
+        });
+
+        // Связь слайдера с инпутом (слайдер всегда валиден)
+        rangeInput.addEventListener("input", () => {
+          numberInput.value = rangeInput.value;
+        });
+
+        // Разметка значений по процентам
+        const marksWrap = document.createElement("div");
+        marksWrap.classList.add("sim-marks");
+        marks.forEach(val => {
+          const mark = document.createElement("span");
+          mark.textContent = val;
+          const percent = ((val - min) / (max - min)) * 100;
+          mark.style.position = "absolute";
+          mark.style.left = `${percent}%`;
+          mark.style.transform = "translateX(-50%)";
+          mark.style.top = "0";
+          mark.style.fontSize = "12px";
+          mark.style.color = "#999";
+          mark.style.whiteSpace = "nowrap";
+          marksWrap.appendChild(mark);
+        });
+
+        inputRow.appendChild(numberInput);
+        inputRow.appendChild(suffixSpan);
+        fieldWrap.appendChild(inputRow);
+        fieldWrap.appendChild(rangeInput);
+        fieldWrap.appendChild(marksWrap);
+        fieldWrap.appendChild(hint); // Добавляем подсказку в поле
+
+        return fieldWrap;
+      };
+
+      const amountField = createField("💵 Сумма вложения", 1000, 1000000, 1000, 10000, "₽", "amount", [1000, 250000, 500000, 750000, 1000000]);
+      const rateField = createField("📈 Процентная ставка", 10, 31, 1, 15, "%", "rate", [10, 15, 20, 25, 30, 31]);
+      const periodField = createField("🕒 Срок (мес.)", 1, 120, 1, 12, "мес.", "months", [1, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120]);
+
+      form.appendChild(amountField);
+      form.appendChild(rateField);
+      form.appendChild(periodField);
+
+      const calcBtn = document.createElement("button");
+      calcBtn.textContent = "Рассчитать";
+      calcBtn.classList.add("sim-btn");
+
+      const result = document.createElement("div");
+      result.classList.add("sim-result");
+      result.textContent = "Результат: 0 ₽";
+
+      calcBtn.addEventListener("click", () => {
+        const P = parseFloat(document.getElementById("amount").value);
+        const r = parseFloat(document.getElementById("rate").value) / 100 / 12;
+        const n = parseInt(document.getElementById("months").value);
+
+        const total = P * Math.pow(1 + r, n);
+        const profit = total - P;
+        result.textContent = `Результат: ${profit.toFixed(2)} ₽ прибыли за ${n} мес.`;
+      });
+
+      simWrap.appendChild(form);
+      simWrap.appendChild(calcBtn);
+      simWrap.appendChild(result);
+
+      sec.appendChild(simWrap);
+    }
+
+    // 7) Dialogue (формат переписки)
+    if (section.type === "dialogue") {
+      const dialogWrap = document.createElement("div");
+      dialogWrap.classList.add("dialogue-container");
+
+      section.content.forEach((line, i) => {
+        const msg = document.createElement("div");
+        msg.classList.add("dialogue-message");
+
+        const isLeft = line.speaker === "Маша";
+        msg.classList.add(isLeft ? "left" : "right");
+
+        const avatar = document.createElement("div");
+        avatar.classList.add("avatar");
+        avatar.textContent = isLeft ? "👩" : "🧑"; // можно заменить на <img>
+
+        const bubble = document.createElement("div");
+        bubble.classList.add("bubble");
+        bubble.textContent = line.text;
+
+        // порядок элементов
+        if (isLeft) {
+          msg.append(avatar, bubble);
+        } else {
+          msg.append(bubble, avatar);
+        }
+
+        // добавляем с задержкой для эффекта появления
         setTimeout(() => {
-          hint.style.display = "none";
-        }, 300);
-      }, duration);
-    };
+          msg.classList.add("visible");
+        }, i * 200);
 
-    // Функция для корректировки значения
-    const adjustValue = (value) => {
-      let val = parseFloat(value);
-      let originalVal = val;
-      let message = "";
+        dialogWrap.appendChild(msg);
+      });
 
-      // Если значение не число, возвращаем минимальное
-      if (isNaN(val)) {
-        message = `Установлено минимальное значение: ${min}`;
-        val = min;
-      } else {
-        // Ограничиваем по минимуму и максимуму
-        if (val < min) {
-          message = `Установлено минимальное значение: ${min}`;
-          val = min;
-        } else if (val > max) {
-          message = `Установлено максимальное значение: ${max}`;
-          val = max;
-        }
+      sec.appendChild(dialogWrap);
+    }
 
-        // Для суммы вложения округляем до ближайшего кратного 1000
-        if (id === "amount") {
-          const roundedVal = Math.round(val / 1000) * 1000;
-          if (roundedVal !== val) {
-            message = `Сумма округлена до ${roundedVal.toLocaleString()} ₽ (кратно 1000)`;
-            val = roundedVal;
-          }
-        }
+    // 8) Pie-chart (круговая диаграмма)
+    if (section.type === "piechart") {
+      const chartWrap = document.createElement("div");
+      chartWrap.classList.add("piechart-container");
 
-        // Для процентной ставки округляем до целого числа
-        if (id === "rate") {
-          const roundedVal = Math.round(val);
-          if (roundedVal !== val) {
-            message = `Ставка округлена до ${roundedVal}%`;
-            val = roundedVal;
-          }
-        }
+      // Основной контейнер для диаграммы и легенды
+      const chartContent = document.createElement("div");
+      chartContent.classList.add("piechart-content");
+      chartContent.style.display = "flex";
+      chartContent.style.flexWrap = "wrap";
+      chartContent.style.alignItems = "center";
+      chartContent.style.justifyContent = "center";
+      chartContent.style.gap = "40px";
+      chartContent.style.maxWidth = "800px";
+      chartContent.style.margin = "0 auto";
 
-        // Для месяцев оставляем целым числом
-        if (id === "months") {
-          const roundedVal = Math.round(val);
-          if (roundedVal !== val) {
-            message = `Срок округлен до ${roundedVal} месяцев`;
-            val = roundedVal;
-          }
+      // Контейнер для диаграммы
+      const chartContainer = document.createElement("div");
+      chartContainer.classList.add("piechart");
+      chartContainer.style.position = "relative";
+      chartContainer.style.width = "220px";
+      chartContainer.style.height = "220px";
+
+      // Canvas для диаграммы
+      const canvas = document.createElement("canvas");
+      canvas.width = 220;
+      canvas.height = 220;
+      canvas.style.borderRadius = "50%";
+      canvas.style.boxShadow = "0 8px 25px rgba(0,0,0,0.1)";
+
+      chartContainer.appendChild(canvas);
+      chartContent.appendChild(chartContainer);
+
+      // Легенда сбоку
+      const legend = document.createElement("div");
+      legend.classList.add("piechart-legend");
+      legend.style.display = "flex";
+      legend.style.flexDirection = "column";
+      legend.style.gap = "12px";
+      legend.style.minWidth = "200px";
+
+      const colors = ['#4e8cff', '#ff6b6b', '#51cf66', '#ffd43b', '#9775fa', '#22b8cf'];
+
+      section.content.forEach((item, index) => {
+        const legendItem = document.createElement("div");
+        legendItem.classList.add("legend-item");
+        legendItem.style.display = "flex";
+        legendItem.style.alignItems = "center";
+        legendItem.style.gap = "12px";
+        legendItem.style.padding = "8px 12px";
+        legendItem.style.borderRadius = "8px";
+        legendItem.style.background = "rgba(255,255,255,0.7)";
+        legendItem.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+        legendItem.style.transition = "all 0.3s ease";
+        legendItem.style.opacity = "0";
+        legendItem.style.transform = "translateX(-20px)";
+
+        const colorBox = document.createElement("div");
+        colorBox.classList.add("legend-color");
+        colorBox.style.width = "16px";
+        colorBox.style.height = "16px";
+        colorBox.style.borderRadius = "4px";
+        colorBox.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
+
+        colorBox.style.backgroundColor = colors[index % colors.length];
+
+        const label = document.createElement("span");
+        label.classList.add("legend-label");
+        label.textContent = `${item.label}`;
+        label.style.fontSize = "0.95rem";
+        label.style.fontWeight = "500";
+
+        const value = document.createElement("span");
+        value.classList.add("legend-value");
+        value.textContent = `${item.value}%`;
+        value.style.marginLeft = "auto";
+        value.style.fontWeight = "700";
+        value.style.color = "#333";
+
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(label);
+        legendItem.appendChild(value);
+        legend.appendChild(legendItem);
+
+        // Анимация появления элементов легенды
+        setTimeout(() => {
+          legendItem.style.opacity = "1";
+          legendItem.style.transform = "translateX(0)";
+        }, 600 + index * 100);
+      });
+
+      chartContent.appendChild(legend);
+      chartWrap.appendChild(chartContent);
+
+      // Примечание
+      if (section.note) {
+        const note = document.createElement("p");
+        note.classList.add("piechart-note");
+        note.textContent = section.note;
+        note.style.opacity = "0";
+        chartWrap.appendChild(note);
+
+        setTimeout(() => {
+          note.style.opacity = "1";
+        }, 1000);
+      }
+
+      sec.appendChild(chartWrap);
+
+      // Рисуем диаграмму с анимацией
+      setTimeout(() => {
+        drawAnimatedPieChart(canvas, section.content);
+      }, 300);
+    }
+
+    // Функция для анимированной диаграммы
+    function drawAnimatedPieChart(canvas, data) {
+      const ctx = canvas.getContext('2d');
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY) - 15;
+
+      const colors = ['#4e8cff', '#ff6b6b', '#51cf66', '#ffd43b', '#9775fa', '#22b8cf'];
+      const durations = [800, 1000, 1200, 1400, 1600, 1800];
+
+      let currentAngle = -0.5 * Math.PI;
+      let startTime = Date.now();
+
+      function animate() {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let animatedCurrentAngle = -0.5 * Math.PI;
+
+        data.forEach((item, index) => {
+          const progress = Math.min(1, elapsed / durations[index]);
+          const easedProgress = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+
+          const sliceAngle = (item.value / 100) * 2 * Math.PI * easedProgress;
+
+          // Рисуем сегмент
+          ctx.beginPath();
+          ctx.moveTo(centerX, centerY);
+          ctx.arc(centerX, centerY, radius, animatedCurrentAngle, animatedCurrentAngle + sliceAngle);
+          ctx.closePath();
+
+          ctx.fillStyle = colors[index % colors.length];
+          ctx.fill();
+
+          // Добавляем обводку
+          ctx.strokeStyle = 'white';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          animatedCurrentAngle += sliceAngle;
+        });
+
+        // Белый круг в центре
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius * 0.5, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        if (elapsed < Math.max(...durations)) {
+          requestAnimationFrame(animate);
         }
       }
 
-      return { value: val, message };
-    };
+      animate();
+    }
 
-    // Валидация при потере фокуса
-    numberInput.addEventListener("blur", () => {
-      const { value: adjustedValue, message } = adjustValue(numberInput.value);
-
-      if (numberInput.value !== adjustedValue.toString()) {
-        numberInput.value = adjustedValue;
-        rangeInput.value = adjustedValue;
-        if (message) {
-          showHint(message);
-        }
-      }
-    });
-
-    // Валидация при нажатии Enter
-    numberInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        const { value: adjustedValue, message } = adjustValue(numberInput.value);
-
-        if (numberInput.value !== adjustedValue.toString()) {
-          numberInput.value = adjustedValue;
-          rangeInput.value = adjustedValue;
-          if (message) {
-            showHint(message);
-          }
-        }
-        numberInput.blur();
-      }
-    });
-
-    // Связь слайдера с инпутом (слайдер всегда валиден)
-    rangeInput.addEventListener("input", () => {
-      numberInput.value = rangeInput.value;
-    });
-
-    // Разметка значений по процентам
-    const marksWrap = document.createElement("div");
-    marksWrap.classList.add("sim-marks");
-    marks.forEach(val => {
-      const mark = document.createElement("span");
-      mark.textContent = val;
-      const percent = ((val - min) / (max - min)) * 100;
-      mark.style.position = "absolute";
-      mark.style.left = `${percent}%`;
-      mark.style.transform = "translateX(-50%)";
-      mark.style.top = "0";
-      mark.style.fontSize = "12px";
-      mark.style.color = "#999";
-      mark.style.whiteSpace = "nowrap";
-      marksWrap.appendChild(mark);
-    });
-
-    inputRow.appendChild(numberInput);
-    inputRow.appendChild(suffixSpan);
-    fieldWrap.appendChild(inputRow);
-    fieldWrap.appendChild(rangeInput);
-    fieldWrap.appendChild(marksWrap);
-    fieldWrap.appendChild(hint); // Добавляем подсказку в поле
-
-    return fieldWrap;
-  };
-
-  const amountField = createField("💵 Сумма вложения", 1000, 1000000, 1000, 10000, "₽", "amount", [1000, 250000, 500000, 750000, 1000000]);
-  const rateField = createField("📈 Процентная ставка", 10, 31, 1, 15, "%", "rate", [10, 15, 20, 25, 30, 31]);
-  const periodField = createField("🕒 Срок (мес.)", 1, 120, 1, 12, "мес.", "months", [1, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120]);
-
-  form.appendChild(amountField);
-  form.appendChild(rateField);
-  form.appendChild(periodField);
-
-  const calcBtn = document.createElement("button");
-  calcBtn.textContent = "Рассчитать";
-  calcBtn.classList.add("sim-btn");
-
-  const result = document.createElement("div");
-  result.classList.add("sim-result");
-  result.textContent = "Результат: 0 ₽";
-
-  calcBtn.addEventListener("click", () => {
-    const P = parseFloat(document.getElementById("amount").value);
-    const r = parseFloat(document.getElementById("rate").value) / 100 / 12;
-    const n = parseInt(document.getElementById("months").value);
-
-    const total = P * Math.pow(1 + r, n);
-    const profit = total - P;
-    result.textContent = `Результат: ${profit.toFixed(2)} ₽ прибыли за ${n} мес.`;
-  });
-
-  simWrap.appendChild(form);
-  simWrap.appendChild(calcBtn);
-  simWrap.appendChild(result);
-
-  sec.appendChild(simWrap);
-}
     // Добавляем секцию в тело урока
     lessonBody.appendChild(sec);
   }); // end forEach section
