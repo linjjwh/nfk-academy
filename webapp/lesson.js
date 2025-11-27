@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const API_BASE = "http://127.0.0.1:8000/api";
+  const API_BASE = "nfk-academy-production.up.railway.app";
 
   const tg = window.Telegram?.WebApp;
-  const username = tg?.initDataUnsafe?.user?.username;
+  let username = tg?.initDataUnsafe?.user?.username;
   if (!username) {
   username = "id_" + tg?.initDataUnsafe?.user?.id;
 }

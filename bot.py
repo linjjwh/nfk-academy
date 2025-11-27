@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 
-from config import BOT_TOKEN
+from services.config import BOT_TOKEN
 from middlewares.last_active import LastActivityMiddleware
 from handlers import (
     start_router,
