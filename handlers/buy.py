@@ -1,9 +1,16 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery
+from aiogram.fsm.context import FSMContext
+
+from handlers.registration import start_registration
+from services.google_sheets import update_last_activity
 
 router = Router()
 
 @router.callback_query(F.data == "menu_buy")
-async def buy_page(callback: CallbackQuery):
-    await callback.message.answer("💳 Здесь будет форма покупки")
+async def buy_start(callback: CallbackQuery, state: FSMContext):
+    identifier = str(callback.from_user.id)
+    update_last_activity(identifier, "buy")
+
+    await start_registration(callback, state, purpose="buy")
     await callback.answer()

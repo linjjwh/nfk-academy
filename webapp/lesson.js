@@ -1,28 +1,65 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const API_BASE = "http://127.0.0.1:8000/api";
+
+  const tg = window.Telegram?.WebApp;
+  const username = tg?.initDataUnsafe?.user?.username;
+  if (!username) {
+  username = "id_" + tg?.initDataUnsafe?.user?.id;
+}
   const params = new URLSearchParams(window.location.search);
-  const lessonNum = parseInt(params.get("num")) || 1;
+
+  console.log("URL:", window.location.href);
+console.log("params.get('num'):", params.get("num"));
+console.log("lessonNum после parse:", parseInt(params.get("num")));
+
+
+  const lessonNum = params.get("num") ? parseInt(params.get("num")) : 1;
 
   const lessonTitle = document.getElementById("lesson-title");
-  const lessonIntro = document.getElementById("lesson-text"); // можно использовать для короткого вступления
-  const lessonBody = document.getElementById("lesson-body"); // сюда рендерим содержимое урока
+  const lessonBody = document.getElementById("lesson-body");
   const nextBtn = document.getElementById("next-btn");
   const backBtn = document.getElementById("back-btn");
   const topProgressFill = document.getElementById("top-progress-bar-fill");
   const topProgressPercent = document.getElementById("top-progress-percent");
 
-  // Найдём урок в lessonsData (файл lessonsData.js должен быть подключён раньше)
-  const lesson = (typeof lessonsData !== "undefined") ? lessonsData.find(l => l.id === lessonNum) : null;
-  lessonTitle.textContent = lesson?.title || `Урок ${lessonNum}`;
+  // --- Загружаем урок из API ---
+  let lesson = null;
+  try {
+    const res = await fetch(`${API_BASE}/lessons/${lessonNum}`);
+    if (res.ok) {
+      const data = await res.json();
+      lesson = data.lesson || data;   // <-- достаём сам урок
+      console.log("PARSED LESSON:", lesson);
+    }
 
-  // Очистим тело урока
-  lessonBody.innerHTML = "";
+  } catch (err) {
+    console.warn("Сервер недоступен, используем локальные данные.", err);
+  }
 
-  if (!lesson) {
-    const p = document.createElement("p");
-    p.textContent = "Урок не найден.";
-    lessonBody.appendChild(p);
+// --- Если сервер не ответил — используем локальный lessonsData.json ---
+if (!lesson) {
+  try {
+    const localRes = await fetch("/webapp/lessonsData.json");
+    if (localRes.ok) {
+      const localData = await localRes.json();
+      lesson = localData.find(l => parseInt(l.id) === lessonNum);
+      console.log("Урок загружен локально:", lesson);
+    } else {
+      console.error("Не удалось загрузить локальный lessonsData.json:", localRes.status);
+    }
+  } catch (err) {
+    console.error("Ошибка при загрузке локальных данных:", err);
+  }
+}
+
+  if (!lesson || !lesson.sections) {
+    lessonTitle.textContent = "Ошибка: урок не найден.";
+    lessonBody.innerHTML = "<p>Не удалось загрузить данные урока.</p>";
     return;
   }
+
+  lessonTitle.textContent = lesson.title || `Урок ${lessonNum}`;
+  lessonBody.innerHTML = "";
 
   // Рендерим секции
   lesson.sections.forEach(section => {
@@ -1014,9 +1051,23 @@ if (section.type === "drag-drop") {
   }); // end forEach section
 
 
-  /* ===== Прогресс: сохраняем/читаем из localStorage (как у тебя было) ===== */
-  let maxProgress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
+  // --- Загружаем текущий прогресс пользователя ---
+  let maxProgress = 0;
+  try {
+    const res = await fetch(`${API_BASE}/progress/${username}/${lessonNum}`);
+    if (res.ok) {
+      const data = await res.json();
+      maxProgress = data.progress || 0;
+    } else {
+      console.warn("Не удалось получить прогресс, используем localStorage.");
+      maxProgress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
+    }
+  } catch (err) {
+    console.warn("Ошибка соединения при загрузке прогресса:", err);
+    maxProgress = parseInt(localStorage.getItem(`lesson_${lessonNum}`)) || 0;
+  }
 
+  // --- Обновляем прогрессбар ---
   function updateProgressUI() {
     if (topProgressFill) topProgressFill.style.width = `${maxProgress}%`;
     if (topProgressPercent) topProgressPercent.textContent = `${maxProgress}%`;
@@ -1036,7 +1087,8 @@ if (section.type === "drag-drop") {
 
   updateProgressUI();
 
-  window.addEventListener("scroll", () => {
+  // --- Отслеживаем скролл и сохраняем прогресс ---
+  window.addEventListener("scroll", async () => {
     const scrollTop = window.scrollY;
     const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
     let scrolledPercent = Math.round((scrollTop / (scrollHeight || 1)) * 100);
@@ -1044,29 +1096,67 @@ if (section.type === "drag-drop") {
       maxProgress = Math.min(scrolledPercent, 100);
       localStorage.setItem(`lesson_${lessonNum}`, maxProgress);
       updateProgressUI();
+
+      // Сохраняем на сервер
+      try {
+        await fetch(`${API_BASE}/progress/update`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username,
+            lesson_id: lessonNum,
+            progress: maxProgress
+          })
+        });
+      } catch (err) {
+        console.warn("Ошибка при отправке прогресса на сервер:", err);
+      }
     }
   });
 
-  // Next / Back handlers
-  if (nextBtn) {
-    nextBtn.addEventListener("click", (e) => {
-      if (maxProgress < 100) {
-        e.preventDefault();
-        return;
-      }
-      // определяем список уроков (переменная lessons или lessonsData)
-      const total = (typeof lessonsData !== "undefined") ? lessonsData.length : (window.lessons ? lessons.length : lessonNum);
-      if (lessonNum < total) {
-        window.location.href = `lesson.html?num=${lessonNum + 1}`;
+// --- Переход между уроками ---
+if (nextBtn) {
+  nextBtn.addEventListener("click", async (e) => {
+    if (maxProgress < 100) {
+      e.preventDefault();
+      return;
+    }
+
+    let total = lessonNum; // fallback по умолчанию
+
+    try {
+      // Сначала пробуем получить общее количество уроков с сервера
+      const res = await fetch(`${API_BASE}/lessons`);
+      if (res.ok) {
+        const data = await res.json();
+        total = data.length;
       } else {
-        window.location.href = "index.html";
+        throw new Error("Сервер не ответил");
       }
-    });
-  }
+    } catch {
+      // Если сервер недоступен — пробуем локальный JSON
+      try {
+        const localRes = await fetch("../lessonsData.json");
+        if (localRes.ok) {
+          const localData = await localRes.json();
+          total = localData.length;
+        }
+      } catch (err) {
+        console.warn("Не удалось определить количество уроков:", err);
+      }
+    }
+
+    // Переход на следующий урок
+    if (lessonNum < total) {
+      window.location.href = `lesson.html?num=${lessonNum + 1}`;
+    } else {
+      window.location.href = "index.html";
+    }
+  });
+}
 
   if (backBtn) {
-    backBtn.addEventListener("click", (e) => {
-      e.preventDefault();
+    backBtn.addEventListener("click", () => {
       window.location.href = "index.html";
     });
   }

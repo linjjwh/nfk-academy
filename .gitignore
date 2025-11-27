@@ -1,6 +1,6 @@
 # Секреты и конфиги
 .env
-credentials.json
+services/credentials.json
 config.py
 
 # Кеши и служебные файлы
