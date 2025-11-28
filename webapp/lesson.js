@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const API_BASE = "https://nfk-academy-production.up.railway.app";
+  const BASE = "/nfk-academy";
 
   const tg = window.Telegram?.WebApp;
   let username = tg?.initDataUnsafe?.user?.username;
@@ -39,7 +40,7 @@ console.log("lessonNum после parse:", parseInt(params.get("num")));
 // --- Если сервер не ответил — используем локальный lessonsData.json ---
 if (!lesson) {
   try {
-    const localRes = await fetch("/webapp/lessonsData.json");
+    const localRes = await fetch(`${BASE}/webapp/lessonsData.json`);
     if (localRes.ok) {
       const localData = await localRes.json();
       lesson = localData.find(l => parseInt(l.id) === lessonNum);
@@ -71,6 +72,7 @@ if (!lesson) {
     if (section.heading) {
       const h = document.createElement("h2");
       h.textContent = section.heading;
+      sec.appendChild(h);
       sec.appendChild(h);
     }
 
@@ -1136,7 +1138,7 @@ if (nextBtn) {
     } catch {
       // Если сервер недоступен — пробуем локальный JSON
       try {
-        const localRes = await fetch("../lessonsData.json");
+        const localRes = await fetch(`${BASE}/webapp/lessonsData.json`);
         if (localRes.ok) {
           const localData = await localRes.json();
           total = localData.length;
@@ -1148,16 +1150,16 @@ if (nextBtn) {
 
     // Переход на следующий урок
     if (lessonNum < total) {
-      window.location.href = `lesson.html?num=${lessonNum + 1}`;
+      window.location.href = `${BASE}/lesson.html?num=${lessonNum + 1}`;
     } else {
-      window.location.href = "index.html";
+      window.location.href = `${BASE}/index.html`;
     }
   });
 }
 
   if (backBtn) {
     backBtn.addEventListener("click", () => {
-      window.location.href = "index.html";
+      window.location.href = `${BASE}/index.html`;
     });
   }
 });

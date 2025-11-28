@@ -1,7 +1,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const API_BASE = "https://nfk-academy-production.up.railway.app";
+  const BASE = "/nfk-academy";
+
   const tg = window.Telegram?.WebApp;
-  const username = tg?.initDataUnsafe?.user?.username || "testuser";
+  let username = tg?.initDataUnsafe?.user?.username;
   if (!username) {
   username = "id_" + tg?.initDataUnsafe?.user?.id;
 }
@@ -109,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       // Переход на урок
-      window.location.href = `lesson.html?num=${lessonNum}`;
+      window.location.href = `${BASE}/lesson.html?num=${lessonNum}`;
     });
   });
 });
