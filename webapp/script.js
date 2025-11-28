@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const API_BASE = "nfk-academy-production.up.railway.app";
+  const API_BASE = "https://nfk-academy-production.up.railway.app";
   const tg = window.Telegram?.WebApp;
   const username = tg?.initDataUnsafe?.user?.username || "testuser";
   if (!username) {
