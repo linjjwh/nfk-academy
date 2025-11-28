@@ -40,7 +40,7 @@ console.log("lessonNum после parse:", parseInt(params.get("num")));
 // --- Если сервер не ответил — используем локальный lessonsData.json ---
 if (!lesson) {
   try {
-    const localRes = await fetch(`${BASE}/webapp/lessonsData.json`);
+    const localRes = await fetch(`${BASE}/lessonsData.json`);
     if (localRes.ok) {
       const localData = await localRes.json();
       lesson = localData.find(l => parseInt(l.id) === lessonNum);
@@ -1138,7 +1138,7 @@ if (nextBtn) {
     } catch {
       // Если сервер недоступен — пробуем локальный JSON
       try {
-        const localRes = await fetch(`${BASE}/webapp/lessonsData.json`);
+        const localRes = await fetch(`${BASE}/lessonsData.json`);
         if (localRes.ok) {
           const localData = await localRes.json();
           total = localData.length;

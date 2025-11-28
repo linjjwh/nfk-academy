@@ -4,9 +4,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const tg = window.Telegram?.WebApp;
   let username = tg?.initDataUnsafe?.user?.username;
-  if (!username) {
-  username = "id_" + tg?.initDataUnsafe?.user?.id;
+
+if (!username) {
+    const uid = tg?.initDataUnsafe?.user?.id;
+    username = uid ? "id_" + uid : "id_unknown";
 }
+
   const lessonsList = document.querySelector(".lessons ul");
 
   if (!username) {
