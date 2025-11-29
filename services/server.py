@@ -41,7 +41,7 @@ app.add_middleware(
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))          # services/
-FRONTEND_DIR = os.path.join(BASE_DIR, "..", "webapp")          # webapp/
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "webapp"))          # webapp/
 LESSONS_PATH = os.path.join(FRONTEND_DIR, "lessonsData.json")
 
 app.mount("/webapp", StaticFiles(directory=FRONTEND_DIR), name="webapp")
