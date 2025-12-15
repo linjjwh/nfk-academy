@@ -25,7 +25,8 @@ from handlers import (
     registration_router,
     menu_router,
     buy_buttons_router,
-    buy_form_router
+    buy_form_router,
+    feedback_router
 )
 
 # FASTAPI
@@ -149,6 +150,7 @@ dp.include_router(registration_router)
 dp.include_router(menu_router)
 dp.include_router(buy_buttons_router)
 dp.include_router(buy_form_router)
+dp.include_router(feedback_router)
 
 
 async def run_bot():

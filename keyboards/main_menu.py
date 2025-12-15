@@ -7,6 +7,6 @@ def main_menu():
     kb.button(text="💸 Купить облигации", callback_data="menu_buy")
     kb.button(text="👤 Связь с менеджером", callback_data="menu_manager")
     kb.button(text="❓ FAQ", callback_data="menu_faq")
-    kb.button(text="📝 Обратная связь по боту", callback_data="menu_feedback")
+    kb.button(text="📝 Оставить отзыв о боте", callback_data="menu_feedback")
     kb.adjust(1)
     return kb.as_markup()
