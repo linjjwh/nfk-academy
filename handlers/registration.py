@@ -12,6 +12,7 @@ from services.google_sheets import (
     get_edu_progress,
 )
 
+from services.config import ADMIN_IDS
 from keyboards.edu_button import edu_keyboard
 from keyboards.buy_button import buy_keyboard
 from handlers.buy_form import Buy
@@ -201,15 +202,14 @@ async def post_registration_action(message: Message | CallbackQuery, state: FSMC
         user_obj = message.from_user if isinstance(message, Message) else message.from_user
         tg = user_obj.username
 
-        ADMIN_ID = 745253253
-
-        await message.bot.send_message(
-            ADMIN_ID,
-            f"📨 Новая заявка на связь:\n"
-            f"ФИО: {fio}\n"
-            f"Телефон: {phone}\n"
-            f"Telegram: @{tg if tg else 'не указан'}"
-        )
+        for admin_id in ADMIN_IDS:
+            await message.bot.send_message(
+                admin_id,
+                f"📨 Новая заявка на связь:\n"
+                f"ФИО: {fio}\n"
+                f"Телефон: {phone}\n"
+                f"Telegram: @{tg if tg else 'не указан'}"
+            )
 
         await msg.answer("Спасибо! Менеджер свяжется с вами в ближайшее время. 📞")
         return

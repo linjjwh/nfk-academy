@@ -8,6 +8,7 @@ from .about import router as about_router
 from .faq import router as faq_router
 from .edu import router as edu_router
 from .buy_buttons import router as buy_buttons_router
+from .feedback import router as feedback_router
 
 routers = [
     start_router,
@@ -19,5 +20,6 @@ routers = [
     about_router,
     faq_router,
     edu_router,
-    buy_buttons_router
+    buy_buttons_router,
+    feedback_router
 ]

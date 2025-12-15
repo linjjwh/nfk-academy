@@ -17,7 +17,8 @@ from handlers import (
     registration_router,
     menu_router,
     buy_buttons_router,
-    buy_form_router
+    buy_form_router,
+    feedback_router
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +44,7 @@ async def main():
     dp.include_router(menu_router)
     dp.include_router(buy_buttons_router)
     dp.include_router(buy_form_router)
+    dp.include_router(feedback_router)
 
     await dp.start_polling(bot)
 
