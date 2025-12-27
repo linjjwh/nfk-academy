@@ -1,7 +1,7 @@
 # Секреты и конфиги
 .env
 services/credentials.json
-
+credentials.json
 
 # Кеши и служебные файлы
 __pycache__/
